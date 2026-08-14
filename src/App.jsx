@@ -1,122 +1,99 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { DataProvider } from './context/DataContext.jsx';
+import { AuthProvider, useAuth } from './context/AuthContext.jsx';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
+import PatientLayout from './components/layout/PatientLayout.jsx';
+import HospitalLayout from './components/layout/HospitalLayout.jsx';
 
-function App() {
-  const [count, setCount] = useState(0)
+import Login from './pages/shared/Login.jsx';
+import NotFound from './pages/shared/NotFound.jsx';
+import Unauthorized from './pages/shared/Unauthorized.jsx';
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+import HealthHub from './pages/patient/HealthHub.jsx';
+import PatientPrescriptions from './pages/patient/Prescriptions.jsx';
+import PrescriptionHistory from './pages/patient/PrescriptionHistory.jsx';
+import PatientAppointments from './pages/patient/Appointments.jsx';
+import Profile from './pages/patient/Profile.jsx';
 
-      <div className="ticks"></div>
+import Dashboard from './pages/hospital/Dashboard.jsx';
+import Inventory from './pages/hospital/Inventory.jsx';
+import InventoryEdit from './pages/hospital/InventoryEdit.jsx';
+import Rooms from './pages/hospital/Rooms.jsx';
+import RoomBooking from './pages/hospital/RoomBooking.jsx';
+import Patients from './pages/hospital/Patients.jsx';
+import Admissions from './pages/hospital/Admissions.jsx';
+import HospitalPrescriptions from './pages/hospital/Prescriptions.jsx';
+import Expenses from './pages/hospital/Expenses.jsx';
+import Budgets from './pages/hospital/Budgets.jsx';
+import HospitalProfile from './pages/hospital/Profile.jsx';
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+/** Sends '/' to the right place: sign-in, or straight to the signed-in user's portal. */
+function RootRedirect() {
+  const { isAuthenticated, role } = useAuth();
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  return <Navigate to={role === 'patient' ? '/patient/health-hub' : '/hospital/dashboard'} replace />;
 }
 
-export default App
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<RootRedirect />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/403" element={<Unauthorized />} />
+
+      <Route
+        path="/patient"
+        element={
+          <ProtectedRoute allow={['patient']}>
+            <PatientLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="health-hub" replace />} />
+        <Route path="health-hub" element={<HealthHub />} />
+        <Route path="prescriptions" element={<PatientPrescriptions />} />
+        <Route path="prescriptions/history" element={<PrescriptionHistory />} />
+        <Route path="appointments" element={<PatientAppointments />} />
+        <Route path="profile" element={<Profile />} />
+      </Route>
+
+      <Route
+        path="/hospital"
+        element={
+          <ProtectedRoute allow={['staff', 'admin']}>
+            <HospitalLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="inventory" element={<Inventory />} />
+        <Route path="inventory/new" element={<InventoryEdit />} />
+        <Route path="inventory/:drugId/edit" element={<InventoryEdit />} />
+        <Route path="rooms" element={<Rooms />} />
+        <Route path="rooms/book" element={<RoomBooking />} />
+        <Route path="patients" element={<Patients />} />
+        <Route path="patients/:patientId" element={<Patients />} />
+        <Route path="admissions" element={<Admissions />} />
+        <Route path="prescriptions" element={<HospitalPrescriptions />} />
+        <Route path="expenses" element={<Expenses />} />
+        <Route path="budgets" element={<Budgets />} />
+        <Route path="profile" element={<HospitalProfile />} />
+      </Route>
+
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
+
+export default function App() {
+  return (
+    <DataProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </BrowserRouter>
+    </DataProvider>
+  );
+}
