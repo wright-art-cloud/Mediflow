@@ -10,9 +10,11 @@ import {
   ArrowLeftRight,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import PreRegisterForm from "../PreRegisterForm/preRegisterForm";
 
 export default function PatientPortal({name}) {
   const [activeTab, setActiveTab] = useState("Health Hub");
+  const [showPreRegisterForm, setShowPreRegisterForm] = useState(false);
 
   let futureDate = new Date;
   futureDate.setDate(futureDate.getDate() + 4);
@@ -159,6 +161,8 @@ export default function PatientPortal({name}) {
                     <span>ROOM 94 block C</span>
                   </p>
                   <button
+                    type="button"
+                    onClick={() => setShowPreRegisterForm(true)}
                     style={{
                       width: "100%",
                       padding: "0.4rem",
@@ -204,6 +208,8 @@ export default function PatientPortal({name}) {
                     <span>ROOM 103 block A</span>
                   </p>
                   <button
+                    type="button"
+                    onClick={() => setShowPreRegisterForm(true)}
                     style={{
                       width: "100%",
                       padding: "0.4rem",
@@ -218,6 +224,13 @@ export default function PatientPortal({name}) {
                 </div>
               </div>
             </div>
+
+            {showPreRegisterForm && (
+              <PreRegisterForm
+                onClose={() => setShowPreRegisterForm(false)}
+                onSuccess={() => setShowPreRegisterForm(false)}
+              />
+            )}
 
             <div className="card">
               <span className="card-title">Recent Care Activity</span>
