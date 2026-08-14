@@ -19,16 +19,19 @@ const DataContext = createContext(null);
 
 export function DataProvider({ children }) {
   const [isReady, setIsReady] = useState(false);
-  // Bumped on every write (see changeEmitter.js). Components that read from
-  // context re-render because this value is part of the context object,
-  // even though the actual data lives in localStorage, not React state.
   const [version, setVersion] = useState(0);
 
   useEffect(() => {
-    initStorage();
-    setIsReady(true);
-    const unsubscribe = subscribe(() => setVersion((v) => v + 1));
-    return unsubscribe;
+    console.log('🟢 DataProvider initializing...');
+    try {
+      initStorage();
+      setIsReady(true);
+      console.log('🟢 DataProvider ready!');
+      const unsubscribe = subscribe(() => setVersion((v) => v + 1));
+      return unsubscribe;
+    } catch (err) {
+      console.error('🔴 DataProvider initialization error:', err);
+    }
   }, []);
 
   const resetDemoData = useCallback(() => {
@@ -36,18 +39,21 @@ export function DataProvider({ children }) {
     setVersion((v) => v + 1);
   }, []);
 
-  const value = {
+  const value = isReady ? {
     isReady,
     version,
     db,
     ...businessLogic,
     ...services,
     resetDemoData,
-  };
+  } : null;
 
-  if (!isReady) return null;
-
-  return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
+  // Always render children, even while initializing (context is just null temporarily)
+  return (
+    <DataContext.Provider value={value}>
+      {children}
+    </DataContext.Provider>
+  );
 }
 
 /**
@@ -57,7 +63,9 @@ export function DataProvider({ children }) {
 export function useMediflowData() {
   const context = useContext(DataContext);
   if (!context) {
-    throw new Error('useMediflowData must be used within a <DataProvider>');
+    console.error('❌ useMediflowData: DataProvider context not ready or not wrapped!');
+    throw new Error('useMediflowData must be used within a <DataProvider>. Make sure DataProvider wraps your entire app before Routes.');
   }
+  console.log('✅ useMediflowData accessed successfully');
   return context;
 }

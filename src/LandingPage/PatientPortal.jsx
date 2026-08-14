@@ -10,9 +10,16 @@ import {
   ArrowLeftRight,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import PreRegisterForm from "../PreRegisterForm/preRegisterForm";
 
 export default function PatientPortal({name}) {
   const [activeTab, setActiveTab] = useState("Health Hub");
+  const [showPreRegisterModal, setShowPreRegisterModal] = useState(false);
+
+  const handleOpenPreRegister = () => {
+    console.log('Opening pre-register form');
+    setShowPreRegisterModal(true);
+  };
 
   let futureDate = new Date;
   futureDate.setDate(futureDate.getDate() + 4);
@@ -159,14 +166,20 @@ export default function PatientPortal({name}) {
                     <span>ROOM 94 block C</span>
                   </p>
                   <button
+                    onClick={handleOpenPreRegister}
                     style={{
                       width: "100%",
                       padding: "0.4rem",
-                      background: "#f1f5f9",
+                      background: "#38bdf8",
+                      color: "white",
                       border: "none",
                       borderRadius: "6px",
                       cursor: "pointer",
+                      fontWeight: "500",
+                      transition: "all 0.25s ease",
                     }}
+                    onMouseOver={(e) => e.target.style.background = "#0ea5e9"}
+                    onMouseOut={(e) => e.target.style.background = "#38bdf8"}
                   >
                     Pre-Register Form
                   </button>
@@ -204,14 +217,20 @@ export default function PatientPortal({name}) {
                     <span>ROOM 103 block A</span>
                   </p>
                   <button
+                    onClick={handleOpenPreRegister}
                     style={{
                       width: "100%",
                       padding: "0.4rem",
-                      background: "#f1f5f9",
+                      background: "#38bdf8",
+                      color: "white",
                       border: "none",
                       borderRadius: "6px",
                       cursor: "pointer",
+                      fontWeight: "500",
+                      transition: "all 0.25s ease",
                     }}
+                    onMouseOver={(e) => e.target.style.background = "#0ea5e9"}
+                    onMouseOut={(e) => e.target.style.background = "#38bdf8"}
                   >
                     Pre-Register Form
                   </button>
@@ -323,6 +342,17 @@ export default function PatientPortal({name}) {
           </div>
         </div>
       </main>
+
+      {/* Pre-Register Modal */}
+      {showPreRegisterModal && (
+        <PreRegisterForm 
+          onClose={() => setShowPreRegisterModal(false)}
+          onSuccess={() => {
+            setShowPreRegisterModal(false);
+            // Optional: refresh patient list or show success notification
+          }}
+        />
+      )}
     </div>
   );
 }
